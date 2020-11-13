@@ -20,6 +20,8 @@ app.post("/", function(req, res) {
 
   request(url,{ json: true }, function(err, response, body){
       res.setHeader("Content-Type", "text/html");
+      if(req.body.country == "CN"){ res.send("you are deshdrohi !!!you should not see their news.")}
+      if(body.totalResults > 0){
     if(!err && response.statusCode){
       for (var i = 0; i < 12; i++) {
         var image = body.articles[""+i].urlToImage;
@@ -28,14 +30,17 @@ app.post("/", function(req, res) {
       res.write(body.articles[""+i].description+"<br>");
       res.write(body.articles[""+i].content+"<br>");
       res.write("<img src ="+image+" width= 500 ><br><br>");
+      res.write("<p>Time: "+body.articles[""+i].publishedAt+"</p>");
+      res.write('<a href="'+body.articles[""+i].url+'">for more info click here</a>');
       }
+    }
       // console.log(json.articles[0].title);
 
       res.send();
-      console.log("status: "+body.status+" total news: "+body.totalResults);
+      console.log("status: "+body.status+" total news: "+body.totalResults+"country: "+req.body.country);
     }
     else{
-      res.send(err);
+      res.send("Unable to find news from "+req.body.country+" country. Sorry for inconvenience by piyush.");
     }
   });
 });
