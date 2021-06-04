@@ -1,4 +1,4 @@
-# NewsSite
+# newsFetch
 
 This webapp is created to get news headline . It use news api to fetch all top 10 news and show selecting the country
 
