@@ -1,55 +1,53 @@
 //jshint esversion:6
+const path = require("path");
 const express = require("express");
-const bodyParser = require("body-parser");
-const https = require("https");
 const request = require("request");
 
 const app = express();
-app.use(bodyParser.urlencoded({
-  extended: true
-}));
+const port = process.env.PORT || 3000;
 
-app.get("/", function(req, res) {
+require("dotenv").config()
+
+app.use(express.urlencoded({ extended: true }));
+app.use(express.static(path.join(__dirname, "public")))
+
+app.get("/", function (req, res) {
   res.sendFile(__dirname + "/index.html");
 });
 
-app.post("/", function(req, res) {
+app.post("/", function (req, res) {
   const id = req.body.country;
   const api = "5f54eed41d8a41c094b9e19a58b356ca";
-  const url = "https://newsapi.org/v2/top-headlines?country=" + id + "&apiKey=" + api+" ";
+  const url = "https://newsapi.org/v2/top-headlines?country=" + id + "&apiKey=" + api + " ";
 
-  request(url,{ json: true }, function(err, response, body){
-      res.setHeader("Content-Type", "text/html");
-      if(req.body.country == "CN"){ res.send("you are deshdrohi !!!you should not see their news.")}
-      if(body.totalResults > 0){
-    if(!err && response.statusCode){
-      for (var i = 0; i < 12; i++) {
-        var image = body.articles[""+i].urlToImage;
+  request(url, { json: true }, function (err, response, body) {
+    res.setHeader("Content-Type", "text/html");
+    if (body.totalResults > 0) {
+      if (!err && response.statusCode) {
+        for (let i = 0; i < 10; i++) {
+          let image = body.articles["" + i].urlToImage;
 
-      res.write("<h2><b>"+body.articles[""+i].title+"</b></h2><br>");
-      res.write(body.articles[""+i].description+"<br>");
-      res.write(body.articles[""+i].content+"<br>");
-      res.write("<img src ="+image+" width= 500 ><br><br>");
-      res.write("<p>Time: "+body.articles[""+i].publishedAt+"</p>");
-      res.write('<a href="'+body.articles[""+i].url+'">for more info click here</a>');
+          res.write("<h2><b>" + (i + 1) + ".  " + body.articles["" + i].title + "</b></h2><br>");
+          res.write(body.articles["" + i].description + "<br>");
+          res.write(body.articles["" + i].content + "<br>");
+          res.write("<img src =" + image + " width= 200 ><br><br>");
+          res.write("<p>Time: " + body.articles["" + i].publishedAt + "</p>");
+          res.write('<a href="' + body.articles["" + i].url + '">Details</a>');
+        }
       }
-    }
-      // console.log(json.articles[0].title);
-
       res.send();
-      console.log("status: "+body.status+" total news: "+body.totalResults+"country: "+req.body.country);
     }
-    else{
-      res.send("Unable to find news from "+req.body.country+" country. Sorry for inconvenience by piyush.");
+    else {
+      res.send("Unable to find news from " + id + " country.");
     }
   });
 });
 
+app.use(function (req, res, next) {
+  res.status(404);
+  res.sendFile(__dirname + "/404.html");
+})
 
-
-
-
-
-app.listen(process.env.PORT || 3000, function(response) {
-  console.log("server is running on port 3000");
+app.listen(port, function () {
+  console.log("server is running on http://localhost:" + port);
 });
